@@ -76,7 +76,7 @@
 </template>
 <script>
   import YButton from '/components/YButton'
-  import { upload, updateheadimage } from '/api/index'
+  import { upload } from '/api/index'
   import YShelf from '/components/shelf'
   import vueCropper from 'vue-cropper'
   import { mapState, mapMutations } from 'vuex'
@@ -130,18 +130,14 @@
         if (this.option.img) {
           this.$refs.cropper.getCropData((data) => {
             this.imgSrc = data
-            upload({imgData: data}).then(res => {
-              if (res.status === '0') {
-                let path = res.result.path
-                updateheadimage({imageSrc: path}).then(res1 => {
-                  if (res1.status === '0') {
-                    let info = this.userInfo
-                    info.avatar = path
-                    this.RECORD_USERINFO({info: info})
-                    alert('更换成功')
-                    this.editAvatarShow = false
-                  }
-                })
+            upload({uploadFile: data}).then(res => {
+              if (res.status === '1') {
+                let path = res.path
+                let info = this.userInfo
+                info.avatar = path
+                this.RECORD_USERINFO({info: info})
+                this.$message('更换成功')
+                this.editAvatarShow = false
               }
             })
           })

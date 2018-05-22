@@ -6,9 +6,10 @@ export const userLogin = (params) => {
 // 退出登陆
 export const loginOut = (params) => {
   return http.fetchPost('/user/logout', params)
-}// 修改头像
-export const updateheadimage = (params) => {
-  return http.fetchPost('/user/updateheadimage', params)
+}
+// 上传图片
+export const upload = (params) => {
+  return http.fetchPost('/user/upload', params)
 }
 // 首页接口
 export const indexHome = (categoryId) => {
@@ -21,10 +22,6 @@ export const userInfo = (params) => {
 // 注册账号
 export const register = (params) => {
   return http.fetchPost('/user/regService', params)
-}
-// 上传图片
-export const upload = (params) => {
-  return http.fetchPost('/user/upload', params)
 }
 // uuid获取接口
 export const uuid = (params) => {

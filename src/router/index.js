@@ -11,9 +11,6 @@ const user = resolve => require(['/page/User/user'], resolve)
 const orderList = resolve => require(['/page/User/children/order'], resolve)
 const information = resolve => require(['/page/User/children/information'], resolve)
 const addressList = resolve => require(['/page/User/children/addressList'], resolve)
-const coupon = resolve => require(['/page/User/children/coupon'], resolve)
-const aihuishou = resolve => require(['/page/User/children/aihuishou'], resolve)
-const support = resolve => require(['/page/User/children/support'], resolve)
 const checkout = resolve => require(['/page/Checkout/checkout'], resolve)
 const payment = resolve => require(['/page/Order/payment'], resolve)
 const paysuccess = resolve => require(['/page/Order/paysuccess'], resolve)
@@ -52,10 +49,7 @@ export default new Router({
       children: [
         {path: 'orderList', name: '订单列表', component: orderList},
         {path: 'information', name: '账户资料', component: information},
-        {path: 'addressList', name: '收货地址', component: addressList},
-        {path: 'coupon', name: '我的优惠', component: coupon},
-        {path: 'support', name: '售后服务', component: support},
-        {path: 'aihuishou', name: '以旧换新', component: aihuishou}
+        {path: 'addressList', name: '收货地址', component: addressList}
       ]
     },
     {path: '/checkout', name: 'checkout', component: checkout},

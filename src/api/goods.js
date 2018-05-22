@@ -12,6 +12,10 @@ export const addressListByAddrId = (addrId) => {
 export const addressUpdate = (params) => {
   return http.fetchPost('/address/update', params)
 }
+// 修改收货地址
+export const setDefaultAddr = (params) => {
+  return http.fetchPost('/address/defaultAddr', params)
+}
 // 添加收货地址
 export const addressAdd = (params) => {
   return http.fetchPost('/address/add', params)

@@ -5,9 +5,9 @@
       <div slot="content">
         <div v-if="addList.length">
           <div class="address-item" v-for="(item,i) in addList" :key="i">
-            <div class="name">{{item.userName}}</div>
-            <div class="address-msg">{{item.streetName}}</div>
-            <div class="telephone">{{item.tel}}</div>
+            <div class="name">{{item.receiverName}}</div>
+            <div class="address-msg">{{item.receiverState + item.receiverCity + item.receiverDistrict + item.receiverAddress}}</div>
+            <div class="telephone">{{item.receiverMobile}}</div>
             <div class="defalut">
               <a @click="changeDef(item)"
                  href="javascript:;"
@@ -16,7 +16,7 @@
             </div>
             <div class="operation">
               <a href="javascript:;" @click="update(item)">修改</a>
-              <a href="javascript:;" :data-id="item.addrId" @click="del(item.addrId,i)">删除</a>
+              <a href="javascript:;" :data-id="item.addrId" @click="del(item.addrId)">删除</a>
             </div>
           </div>
         </div>
@@ -33,31 +33,48 @@
     <y-popup :open="popupOpen" @close='popupOpen=false' :title="popupTitle">
       <div slot="content" class="md" :data-id="msg.addrId">
         <div>
-          <input type="text" placeholder="收货人姓名" v-model="msg.userName">
+          <input type="text" placeholder="收货人姓名" v-model="msg.receiverName">
         </div>
         <div>
-          <input type="number" placeholder="手机号码" v-model="msg.tel">
+          <input type="number" placeholder="固定号码" v-model="msg.receiverPhone">
         </div>
         <div>
-          <input type="text" placeholder="收货地址" v-model="msg.streetName">
+          <input type="number" placeholder="移动电话" v-model="msg.receiverMobile">
         </div>
         <div>
-          <span><input type="checkbox" v-model="msg.isDefault" style="margin-right: 5px;">设为默认</span>
+          <el-cascader
+            size="large"
+            style="width: 100%"
+            :options="options"
+            v-model="selectedOptions"
+            @change="handleChange">
+          </el-cascader>
+        </div>
+        <div>
+          <input type="text" placeholder="收货地址" v-model="msg.receiverAddress">
+        </div>
+        <div>
+          <input type="text" placeholder="邮政编码" v-model="msg.receiverZip">
+        </div>
+        <div>
+            <span> <el-checkbox v-model="msg.isDefault" style="margin-right: 5px;" :true-label="1" :false-label="0">
+              设为默认</el-checkbox></span>
         </div>
         <y-button text='保存'
                   class="btn"
                   :classStyle="btnHighlight?'main-btn':'disabled-btn'"
-                  @btnClick="save({addrId:msg.addrId,userName:msg.userName,tel:msg.tel,streetName:msg.streetName,isDefault:msg.isDefault})">
+                  @btnClick="save({addrId:msg.addrId})">
         </y-button>
       </div>
     </y-popup>
   </div>
 </template>
 <script>
-  import { addressList, addressUpdate, addressAdd, addressDel } from '/api/goods'
+  import { addressList, addressUpdate, addressAdd, addressDel, setDefaultAddr } from '/api/goods'
   import YButton from '/components/YButton'
   import YPopup from '/components/popup'
   import YShelf from '/components/shelf'
+  import { regionData, CodeToText, TextToCode } from 'element-china-area-data'
 
   export default {
     data () {
@@ -67,89 +84,121 @@
         popupTitle: '管理收货地址',
         msg: {
           addrId: '',
-          userName: '',
-          tel: '',
-          streetName: '',
-          isDefault: false
-        }
+          receiverName: '',
+          receiverPhone: '',
+          receiverMobile: '',
+          receiverState: '',
+          receiverCity: '',
+          receiverDistrict: '',
+          receiverAddress: '',
+          receiverZip: '',
+          isDefault: 0
+        },
+        options: regionData,
+        selectedOptions: []
       }
     },
     computed: {
       btnHighlight () {
         let msg = this.msg
-        return msg.userName && msg.tel && msg.streetName
+        return msg.receiverName && msg.receiverPhone && msg.receiverAddress
       }
     },
     methods: {
+      handleChange (value) {
+        this.msg.receiverState = CodeToText[value[0]]
+        this.msg.receiverCity = CodeToText[value[1]]
+        this.msg.receiverDistrict = CodeToText[value[2]]
+      },
       _addressList () {
         addressList().then(res => {
           let data = res.result
           if (data.length) {
-            this.addList = res.result
-            this.addrId = res.result[0].addrId || '1'
+            this.addList = data
+            let defaultAddr = data[0].addrId
+            for (let curr of data) {
+              if (curr.isDefault === 1) {
+                defaultAddr = curr.addrId
+              }
+            }
+            this.addrId = defaultAddr
           } else {
             this.addList = []
           }
         })
       },
       _addressUpdate (params) {
-        addressUpdate(params).then(res => {
+        addressUpdate(this.msg).then(res => {
           this._addressList()
         })
       },
       _addressAdd (params) {
-        addressAdd(params).then(res => {
+        this.msg.isDefault = this.msg.isDefault
+        addressAdd(this.msg).then(res => {
+          this._addressList()
+        })
+      },
+      _addressDel (params) {
+        addressDel(params).then(res => {
           this._addressList()
         })
       },
       changeDef (item) {
         if (!item.isDefault) {
-          item.isDefault = true
-          this._addressUpdate(item)
+          item.isDefault = 1
+          setDefaultAddr(item).then(res => {
+            this._addressList()
+          })
         }
         return false
       },
       // 保存
       save (p) {
         if (p.addrId) {
-          this._addressUpdate(p)
+          this._addressUpdate()
         } else {
           delete p.addrId
-          this._addressAdd(p)
+          this._addressAdd()
         }
         this.popupOpen = false
       },
       // 删除
       del (addrId, i) {
-        addressDel(addrId)
-          .then(res => {
-            if (res.status === '0') {
-              this.addList.splice(i, 1)
-            } else {
-              this.$message.error('删除失败')
-            }
-          })
-          .catch(res => {
-            this.$message.error('删除失败')
-          })
+        this._addressDel(addrId)
       },
       // 修改
       update (item) {
         this.popupOpen = true
         if (item) {
           this.popupTitle = '管理收货地址'
-          this.msg.userName = item.userName
-          this.msg.tel = item.tel
-          this.msg.streetName = item.streetName
+          this.msg.receiverName = item.receiverName
+          this.msg.receiverPhone = item.receiverPhone
+          this.msg.receiverMobile = item.receiverMobile
+
+          this.msg.receiverState = item.receiverState
+          this.msg.receiverCity = item.receiverCity
+          this.msg.receiverDistrict = item.receiverDistrict
+          this.selectedOptions = [TextToCode[item.receiverState].code,
+            TextToCode[item.receiverState][item.receiverCity].code,
+            TextToCode[item.receiverState][item.receiverCity][item.receiverDistrict].code]
+
+          this.msg.receiverAddress = item.receiverAddress
+          this.msg.receiverZip = item.receiverZip
           this.msg.isDefault = item.isDefault
           this.msg.addrId = item.addrId
         } else {
           this.popupTitle = '新增收货地址'
-          this.msg.userName = ''
-          this.msg.tel = ''
-          this.msg.streetName = ''
-          this.msg.isDefault = false
+          this.msg.receiverName = ''
+          this.msg.receiverPhone = ''
+          this.msg.receiverMobile = ''
+          this.msg.receiverState = ''
+          this.msg.receiverCity = ''
+          this.msg.receiverDistrict = ''
+          this.msg.receiverAddress = ''
+          this.msg.receiverZip = ''
+          this.msg.isDefault = 0
           this.msg.addrId = ''
+          this.selectedOptions = []
         }
       }
     },
