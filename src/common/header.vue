@@ -61,11 +61,11 @@
                                   </div>
                                   <div class="item-desc">
                                     <div class="cart-cell"><h4>
-                                      <a href="" v-text="item.productName"></a>
+                                      <a href="" v-html="item.productName"></a>
                                     </h4>
-                                      <p class="attrs"><span>{{item.colour}}</span><span>{{item.size}}</span><span>{{item.weight}}</span>
+                                      <p class="attrs"><span>{{item.colour}}</span><span>{{item.size}}</span><span>{{item.weight}}克</span>
                                       </p> <h6><span class="price-icon">¥</span><span
-                                        class="price-num">{{item.priceView}}</span><span
+                                        class="price-num">{{item.productPrice}}</span><span
                                         class="item-num">x {{item.productNum}}</span>
                                       </h6></div>
                                   </div>
@@ -127,6 +127,7 @@
   import { getCartList, delCart } from '/api/goods'
   import { loginOut } from '/api/index'
   import { setStore, removeStore } from '/utils/storage'
+  import Decimal from 'decimal.js'
 
   export default {
     data () {
@@ -150,7 +151,10 @@
       totalPrice () {
         var totalPrice = 0
         this.cartList && this.cartList.forEach(item => {
-          totalPrice += (item.productNum * item.productPrice)
+          if (item.checked === '1') {
+            let a = new Decimal(item.productPrice).mul(new Decimal(item.productNum))
+            totalPrice = new Decimal(totalPrice).add(new Decimal(a)).toNumber()
+          }
         })
         return totalPrice
       },

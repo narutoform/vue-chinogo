@@ -25,7 +25,7 @@
           <h6>
             <span>{{item.sellPoint}}</span>
             <span class="price">
-              <em>¥</em><i>{{item.priceView}}</i></span>
+              <em>¥</em><i>{{item.price}}</i></span>
           </h6>
         </div>
         <div class="num">

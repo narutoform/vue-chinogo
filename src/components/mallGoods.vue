@@ -15,12 +15,12 @@
           </router-link>
           <y-button text="加入购物车"
                     style="margin: 0 5px"
-                    @btnClick="addCart(msg.id,msg.priceView,msg.title,msg.image.split(',')[0],msg.colour,msg.size,msg.weight)"
+                    @btnClick="addCart(msg.id,msg.price,msg.title,msg.image.split(',')[0],msg.colour,msg.size,msg.weight)"
                     classStyle="main-btn"
           ></y-button>
         </div>
         <p><span style="font-size: 16px">￥</span>
-          {{msg.priceView}}</p>
+          {{msg.price}}</p>
       </div>
     </div>
   </div>

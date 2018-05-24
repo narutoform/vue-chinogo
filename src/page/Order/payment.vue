@@ -63,16 +63,16 @@
         </div>
         <div class="n-b">
           <div class="subtotal ">
-            <div class="subtotal-cell"> ¥ {{(item.productPrice * item.productNum / 100).toFixed(2)}}<br></div>
+            <div class="subtotal-cell"> ¥ {{subtotal(item.productPrice, item.productNum)}}<br></div>
           </div>
           <div class="goods-num ">{{item.productNum}}</div>
-          <div class="price ">¥ {{item.priceView}}</div>
+          <div class="price ">¥ {{item.productPrice}}</div>
         </div>
       </div>
     </div>
     <!--合计-->
     <div class="order-discount-line">
-      <p> 商品总计： <span>¥ {{checkPrice.toFixed(2)}}</span></p>
+      <p> 商品总计： <span>¥ {{checkPrice}}</span></p>
       <p> 运费： <span>+ ¥ 10.00</span></p>
     </div>
   </div>
@@ -81,6 +81,7 @@
   import YShelf from '/components/shelf'
   import YButton from '/components/YButton'
   import { getOrderItemById, payMent, getItemById, addressListByAddrId } from '/api/goods'
+  import Decimal from 'decimal.js'
 
   export default {
     data () {
@@ -101,7 +102,8 @@
         let totalPrice = 0
         this.cartList && this.cartList.forEach(item => {
           if (item.checked === '1') {
-            totalPrice += (item.productNum * item.productPrice) / 100
+            let a = new Decimal(item.productPrice).mul(new Decimal(item.productNum))
+            totalPrice = new Decimal(totalPrice).add(new Decimal(a)).toNumber()
           }
         })
         return totalPrice
@@ -155,6 +157,9 @@
           item.checked = '1'
           this.cartList.push(item)
         })
+      },
+      subtotal (productPrice, productNum) {
+        return new Decimal(productPrice).mul(new Decimal(productNum)).toNumber()
       }
     },
     created () {

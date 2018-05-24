@@ -74,15 +74,14 @@
                           <ul class="attribute">
                             <li><span style="margin-right: 15px">{{item.colour}}</span>
                               <span style="margin-right: 15px">{{item.size}}</span>
-                              <span>{{item.weight}}</span></li>
+                              <span>{{item.weight}}克</span></li>
                           </ul>
                         </div>
                       </div>
                       <!--商品数量-->
                       <div>
                         <!--总价格-->
-                        <div class="subtotal" style="font-size: 14px">¥ {{((item.productPrice * item.productNum) /
-                          100).toFixed(2)}}
+                        <div class="subtotal" style="font-size: 14px">¥ {{subtotal(item.productPrice, item.productNum)}}
                         </div>
                         <!--数量-->
                         <div class="item-cols-num">
@@ -91,7 +90,7 @@
                           </div>
                         </div>
                         <!--价格-->
-                        <div class="price">¥ {{item.priceView}}</div>
+                        <div class="price">¥ {{item.productPrice}}</div>
                       </div>
                     </div>
                   </div>
@@ -104,7 +103,7 @@
                 <div class="shipping">
                   <div class="shipping-box" style="padding: 0 40px;">
                     <div class="shipping-total shipping-price"><h4
-                      class="highlight">应付总额：<em>￥{{checkPrice.toFixed(2)}}</em>
+                      class="highlight">应付总额：<em>￥{{checkPrice}}</em>
                     </h4>
                     </div>
                   </div>
@@ -170,6 +169,7 @@
   import YHeader from '/common/header'
   import YFooter from '/common/footer'
   import { regionData, CodeToText, TextToCode } from 'element-china-area-data'
+  import Decimal from 'decimal.js'
 
   export default {
     data () {
@@ -208,7 +208,8 @@
         let totalPrice = 0
         this.cartList && this.cartList.forEach(item => {
           if (item.checked === '1') {
-            totalPrice += ((item.productNum * item.productPrice) / 100)
+            let a = new Decimal(item.productPrice).mul(new Decimal(item.productNum))
+            totalPrice = new Decimal(totalPrice).add(new Decimal(a)).toNumber()
           }
         })
         return totalPrice
@@ -360,6 +361,9 @@
           }
           this.cartList.push(item)
         })
+      },
+      subtotal (productPrice, productNum) {
+        return new Decimal(productPrice).mul(new Decimal(productNum)).toNumber()
       }
     },
     created () {

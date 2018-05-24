@@ -33,7 +33,7 @@
                     <div class="ellipsis">{{good.title}}</div>
                   </div>
                   <div class="cart-l-r">
-                    <div>¥ {{(good.totalFee / 100).toFixed(2)}}</div>
+                    <div>¥ {{good.price}}</div>
                     <div class="num">{{good.num}}</div>
                     <div class="type"><a @click="_delOrder(item.order.orderId,i)" href="javascript:;" v-if="j<1"
                                          class="del-order">删除此订单</a>
@@ -46,7 +46,7 @@
                 </div>
               </div>
               <div class="prod-operation pa" style="right: 0;top: 0;">
-                <div class="total">¥ {{(item.order.payment / 100).toFixed(2)}}</div>
+                <div class="total">¥ {{item.order.payment}}</div>
                 <div class="status"> {{item.order.status | payStatus}}</div>
               </div>
             </div>

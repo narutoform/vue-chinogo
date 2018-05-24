@@ -40,7 +40,7 @@
                           <ul class="attribute">
                             <li><span style="margin-right: 15px">{{item.colour}}</span>
                               <span style="margin-right: 15px">{{item.size}}</span>
-                              <span>{{item.weight}}</span></li>
+                              <span>{{item.weight}}克</span></li>
                           </ul>
                         </div>
                       </div>
@@ -51,8 +51,7 @@
                       <!--商品数量-->
                       <div>
                         <!--总价格-->
-                        <div class="subtotal" style="font-size: 14px">¥ {{((item.productPrice * item.productNum) /
-                          100).toFixed(2)}}
+                        <div class="subtotal" style="font-size: 11px">¥ {{subtotal(item.productPrice, item.productNum)}}
                         </div>
                         <!--数量-->
                         <buy-num :num="item.productNum"
@@ -62,12 +61,12 @@
                                    display: flex;
                                    align-items: center;
                                    justify-content: center;"
-                                 :limit="5"
+                                 :limit="200"
                                  @edit-num="EditNum"
                         >
                         </buy-num>
                         <!--价格-->
-                        <div class="price1">¥ {{item.priceView}}</div>
+                        <div class="price1">¥ {{item.productPrice}}</div>
                       </div>
                     </div>
                   </div>
@@ -92,7 +91,7 @@
                     class="highlight">已选择 <i v-text="checkNum"></i> 件商品</h4>
                     <h5>共计 <i v-text="totalNum"></i> 件商品</h5></div>
                   <div class="shipping-total shipping-price"><h4
-                    class="highlight">应付总额：<span>￥</span><i v-text="checkPrice.toFixed(2)"></i>
+                    class="highlight">应付总额：<span>￥</span><i v-text="checkPrice"></i>
                   </h4>
                     <h5 class="shipping-tips ng-scope">应付总额不含运费</h5>
                   </div>
@@ -110,7 +109,7 @@
           </div>
           <p style="text-align: center;padding: 20px;color: #8d8d8d">你的购物车空空如也</p>
           <div style="text-align: center">
-            <router-link to="/goods">
+            <router-link to="/home">
               <y-button text="现在选购" style="width: 150px;height: 40px;line-height: 38px;color: #8d8d8d"></y-button>
             </router-link>
           </div>
@@ -128,6 +127,7 @@
   import YHeader from '/common/header'
   import YFooter from '/common/footer'
   import BuyNum from '/components/buynum'
+  import Decimal from 'decimal.js'
 
   export default {
     data () {
@@ -162,7 +162,8 @@
         var totalPrice = 0
         this.cartList && this.cartList.forEach(item => {
           if (item.checked === '1') {
-            totalPrice += ((item.productNum * item.productPrice) / 100)
+            let a = new Decimal(item.productPrice).mul(new Decimal(item.productNum))
+            totalPrice = new Decimal(totalPrice).add(new Decimal(a)).toNumber()
           }
         })
         return totalPrice
@@ -256,6 +257,9 @@
       },
       checkout () {
         this.$router.push({path: 'checkout'})
+      },
+      subtotal (productPrice, productNum) {
+        return new Decimal(productPrice).mul(new Decimal(productNum)).toNumber()
       }
     },
     mounted () {
